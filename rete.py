@@ -3,12 +3,7 @@ from io import open
 import glob
 import os
 from re import A
-from tkinter import HIDDEN
-import unicodedata
-import string
 import random
-import time
-import math
 import csv
 import pandas as pd
 
@@ -20,7 +15,7 @@ PATH = r"./"
 
 # DEFINIAMO DEGLI IPERPARAMETRI PER LA NOSTRA RETE
 POINTS = 33
-HIDDEN_SIZE = 33
+HIDDEN_SIZE = 1
 
 def findFiles(path): return glob.glob(path)
 
@@ -86,7 +81,7 @@ def random_training_example():
     sequence_tensor = csv_to_tensor(sequence)
     return category,sequence,category_tensor,sequence_tensor
 
-
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 ##### SECONDO TIPO DI RETE TROVATA ONLINE CHE USA RNN 
@@ -120,11 +115,13 @@ class RNN(nn.Module):
 # la dimensione delle nostro stato nascosto per ora abbiamo scelto 128, e infine la dimensione dell output che dovrà essere una lista
 # con dimensione uguale al numero di gesture che vogliamo riconoscere
 
-rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures)
+rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
+
 
 #
+criterion = nn.CrossEntropyLoss()
 
-criterion = nn.NLLLoss()
+#criterion = nn.NLLLoss()
 learning_rate = 0.005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 
@@ -135,12 +132,12 @@ def train(line_tensor, category_tensor):
     for i in range(line_tensor.size()[0]):
         if skip_frame==0:
             output, hidden = rnn(line_tensor[i], hidden)
-            skip_frame=5
+            skip_frame=4
         else:
             skip_frame=skip_frame-1
         
 
-    loss = criterion(output, category_tensor)
+    loss = criterion(output, category_tensor).to(device)
     
     optimizer.zero_grad()
     loss.backward()
@@ -152,21 +149,31 @@ current_loss = 0
 all_losses = []
 plot_steps, print_steps = 1000, 5000
 n_iters = 100000
-for i in range(n_iters):
-    category, line, category_tensor, line_tensor = random_training_example()
-    
-    output, loss = train(line_tensor, category_tensor)
-    current_loss += loss 
-    
-    if (i+1) % plot_steps == 0:
-        all_losses.append(current_loss / plot_steps)
-        current_loss = 0
+
+if not os.path.exists(PATH + r"RNN.pth"):
+    print('modello non allenato')
+
+    for i in range(n_iters):
+        category, line, category_tensor, line_tensor = random_training_example()
         
-    if (i+1) % print_steps == 0:
-        guess = category_from_output(output)
-        correct = "CORRECT" if guess == category else f"WRONG ({category})"
-        print(f"{i+1} {(i+1)/n_iters*100} {loss:.4f} {line} / {guess} {correct}")
-        print("valore dell output ",output)
+        output, loss = train(line_tensor, category_tensor)
+        current_loss += loss 
+        
+        if (i+1) % plot_steps == 0:
+            all_losses.append(current_loss / plot_steps)
+            current_loss = 0
+            
+        if (i+1) % print_steps == 0:
+            guess = category_from_output(output)
+            correct = "CORRECT" if guess == category else f"WRONG ({category})"
+            print(f"{i+1} {(i+1)/n_iters*100} {loss:.4f} {line} / {guess} {correct}")
+            print("valore dell output ",output)
+    
+    torch.save(rnn.state_dict(), PATH + r"RNN.pth")
+
+else:
+    rnn.load_state_dict(torch.load(PATH + r"RNN.pth"))
+    
         
     
 plt.figure()
@@ -181,7 +188,7 @@ def predict(input_line):
         hidden = rnn.init_hidden()
     
         for i in range(line_tensor.size()[0]):
-            output, hidden = rnn(line_tensor[i], hidden)
+            output, hidden = rnn(line_tensor[i].to(device), hidden.to(device))
         
         guess = category_from_output(output)
         print(guess)
