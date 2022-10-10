@@ -102,7 +102,7 @@ class RNN(nn.Module):
 
         input_tensor = input_tensor.float()
 
-        combined = torch.cat((input_tensor, hidden_tensor), 1)
+        combined = torch.cat((input_tensor.to(device), hidden_tensor.to(device)), 1)
         hidden = self.i2h(combined)
         output = self.i2o(combined)
         output = self.softmax(output)
@@ -137,7 +137,7 @@ def train(line_tensor, category_tensor):
             skip_frame=skip_frame-1
         
 
-    loss = criterion(output, category_tensor).to(device)
+    loss = criterion(output.to(device), category_tensor.to(device)).to(device)
     
     optimizer.zero_grad()
     loss.backward()
