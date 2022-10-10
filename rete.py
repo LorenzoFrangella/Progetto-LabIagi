@@ -172,7 +172,7 @@ if not os.path.exists(PATH + r"RNN.pth"):
     torch.save(rnn.state_dict(), PATH + r"RNN.pth")
 
 else:
-    rnn.load_state_dict(torch.load(PATH + r"RNN.pth"))
+    rnn.load_state_dict(torch.load(PATH + r"RNN.pth",map_location=device))
     
         
     
