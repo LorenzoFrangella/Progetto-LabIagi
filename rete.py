@@ -81,8 +81,13 @@ def random_training_example():
     sequence_tensor = csv_to_tensor(sequence)
     return category,sequence,category_tensor,sequence_tensor
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+if torch.cuda.is_available():
+    device = 'cuda'
+# elif torch.backends.mps.is_available() and torch.backends.mps.is_built(): device = 'mps'
+else: 
+    device = 'cpu'
 
+print('using device: ',device)
 
 ##### SECONDO TIPO DI RETE TROVATA ONLINE CHE USA RNN 
 
