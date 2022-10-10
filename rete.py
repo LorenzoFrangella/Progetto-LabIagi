@@ -198,7 +198,10 @@ while True:
     sentence = input("Input:")
     if sentence == "quit":
         break
-    
+    if sentence == "test":
+        for gesture in all_gestures:
+            
+
     predict(sentence)
     
 
