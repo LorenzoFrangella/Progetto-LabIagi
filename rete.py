@@ -191,7 +191,8 @@ def predict(input_line):
             output, hidden = rnn(line_tensor[i].to(device), hidden.to(device))
         
         guess = category_from_output(output)
-        print(guess)
+        #print(guess)
+        return(guess)
 
 
 while True:
@@ -199,10 +200,22 @@ while True:
     if sentence == "quit":
         break
     if sentence == "test":
+        score = 0
+        number_of_tests = 0
+        print('start testing the result')
         for gesture in all_gestures:
-            
+            list_of_videos = glob.glob('./data/'+gesture+ '/'+ '*.csv')
+            for elem in list_of_videos:
+                solution = gesture
+                predicted_value = predict(elem)
+                if predicted_value == solution:
+                    score +=1
+                number_of_tests +=1
+                print('test number: ',number_of_tests,' it must be: ', solution, ' it is: ', predicted_value)
+        print('test ultimated, accuracy on the train dataset: ',score/number_of_tests)
 
-    predict(sentence)
+    else: 
+        print(predict(sentence))
     
 
 '''
