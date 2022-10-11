@@ -13,13 +13,15 @@ import matplotlib.pyplot as plt
 
 PATH = r"./"
 
-# DEFINIAMO DEGLI IPERPARAMETRI PER LA NOSTRA RETE
+# THESE ARE THE PARAMETERS FOR MY NEURAL NETWORK
+# POINTS VARIABLE IS THE SIZE OF THE INPUT OF MY NEURAL NETWORK
+
 POINTS = 33
 HIDDEN_SIZE = 1
 
 def findFiles(path): return glob.glob(path)
 
-## FUNZIONE PER CARICARE I DATI DAI FILE CSV
+## FUNCTION TO LOAD DATAS FROM A CSV IN A LIST OF TENSORS
 
 def csv_to_list_of_tensor(file):
 
@@ -37,15 +39,21 @@ def csv_to_list_of_tensor(file):
             list_of_tensor.append(tensor_output)
     return list_of_tensor
 
+#FUNCTION TO LOAD DATA FROM CSV TO TENSOR
+
 def csv_to_tensor(filecsv):
     train = pd.read_csv(filecsv)
     train_tensor = torch.tensor(train.values)
     return train_tensor
 
 
+# ARRAY TO STORE THE NAME OFF ALL THE GESTURES
+
 all_gestures = []
 
-#print(os.walk('./'))
+#THE CODE UNDER THIS COMMENT IS TO LOAD THE GESTURES NAME FROME THE DATA DIRECTORY
+#USING THE FOLDERS INSIDE THIS AS NAMES OF THE GESTURES CAUSE THESE ARE DIVIDED 
+#IN DIFFERENT DIRECTORIES FOR ANY CLASS
 
 rootdir = './data'
 for file in os.listdir(rootdir):
@@ -58,6 +66,7 @@ print(all_gestures)
 num_gestures = len(all_gestures)
 
 
+#THIS FUNCTION IS USED TO GET A RANDOM FILE FROM THE DATA DIR AS INPUT FOR OUR NEURAL NETWORK
 
 def get_random_video():
     random_index = random.randrange(0,num_gestures)
@@ -73,6 +82,12 @@ def category_from_output(output):
     category_idx = torch.argmax(output).item()
     return all_gestures[category_idx]
 
+#THIS FUNCTION GET AS INPUT THE RANDOM VIDEO FROM get_random_video() FUNCTION AND RETURNS 
+# 1) THE CATEGORY WHICH THE FILE BELONGS TO AS A STRING
+# 2) THE INPUT FILE NAME
+# 3) A TENSOR WHICH IS A ONE HOT VECTOR FOR THE CATEGORY
+# 4) THE INPUT DATA AS TENSOR (THAT IS A MATRIX)
+
 def random_training_example():
     category, sequence = get_random_video()
     li = all_gestures.index(category)
@@ -81,18 +96,24 @@ def random_training_example():
     sequence_tensor = csv_to_tensor(sequence)
     return category,sequence,category_tensor,sequence_tensor
 
+<<<<<<< Updated upstream
 if torch.cuda.is_available():
     device = 'cuda'
 # elif torch.backends.mps.is_available() and torch.backends.mps.is_built(): device = 'mps'
 else: 
     device = 'cpu'
+=======
+
+# SETTING THE CORRECT GRAPHIC ACCELERATION
+device = "cuda" if torch.cuda.is_available() else "cpu"
+>>>>>>> Stashed changes
 
 print('using device: ',device)
 
 ##### SECONDO TIPO DI RETE TROVATA ONLINE CHE USA RNN 
 
 class RNN(nn.Module):
-    # implement RNN from scratch rather than using nn.RNN
+
     
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
@@ -116,17 +137,16 @@ class RNN(nn.Module):
     def init_hidden(self):
         return torch.zeros(1, self.hidden_size)
     
-# Inizializziamo la rete neurale ricorrente con i parametri giusti ovvero la dimensione dell input:33 punti per 3 coordinate ciascuno,
-# la dimensione delle nostro stato nascosto per ora abbiamo scelto 128, e infine la dimensione dell output che dovrà essere una lista
-# con dimensione uguale al numero di gesture che vogliamo riconoscere
+
 
 rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 
 
-#
-criterion = nn.CrossEntropyLoss()
 
+criterion = nn.CrossEntropyLoss()
 #criterion = nn.NLLLoss()
+
+
 learning_rate = 0.005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 
@@ -137,7 +157,7 @@ def train(line_tensor, category_tensor):
     for i in range(line_tensor.size()[0]):
         if skip_frame==0:
             output, hidden = rnn(line_tensor[i], hidden)
-            skip_frame=4
+            skip_frame=0
         else:
             skip_frame=skip_frame-1
         
@@ -209,7 +229,7 @@ while True:
         number_of_tests = 0
         print('start testing the result')
         for gesture in all_gestures:
-            list_of_videos = glob.glob('./data/'+gesture+ '/'+ '*.csv')
+            list_of_videos = glob.glob('./test/'+gesture+ '/'+ '*.csv')
             for elem in list_of_videos:
                 solution = gesture
                 predicted_value = predict(elem)

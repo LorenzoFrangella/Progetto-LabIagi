@@ -83,8 +83,7 @@ def random_training_example():
     li = all_gestures.index(category)
     category_tensor = torch.tensor([all_gestures.index(category)], dtype=torch.long)
     sequence_tensor = csv_to_tensor(sequence)
-    return category_tensor, sequence_tensor, 
-
+    return category_tensor, sequence_tensor
 
 
 #PRIMO TIPO DI RETE NEURALE TROVATA ONLINE CHE USA LSTM
@@ -101,8 +100,7 @@ class RNN(nn.Module):
     def __init__(self, in_features: int, hidden_dim: int, num_classes: int):
         super(RNN, self).__init__()
 
-        self.lstm = nn.LSTM(input_size=in_features, HIDDEN_SIZE=hidden_dim, num_layers=1, batch_first=True, dropout=0.2)
-        self.flatten = nn.Flatten()
+        self.lstm = nn.LSTM(input_size=in_features, hidden_size=hidden_dim, num_layers=1, batch_first=True, dropout=0.2)
         self.mlp_1 = nn.Linear(hidden_dim, num_classes)
 
         self.relu = nn.ReLU()
@@ -110,7 +108,7 @@ class RNN(nn.Module):
 
     def forward(self, x: torch.Tensor):
         x, (hn, cn) = self.lstm(x)
-
+        
         x = torch.transpose(hn, 0, 1)
         x = self.flatten(x)
         x = self.softmax(self.mlp_1(x))
@@ -135,8 +133,6 @@ if __name__ == "__main__":
 
     learning_rate = 0.005
 
-
-    assert torch.cuda.is_available(), "Notebook is not configured properly!"
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using {device} device")
 
@@ -159,7 +155,7 @@ if __name__ == "__main__":
         start = time.time()
 
         for iter in range(1, n_iters + 1):
-            category_tensor, input_line_tensor, target_line_tensor = random_training_example()
+            input_line_tensor, target_line_tensor = random_training_example()
             
             hidden = torch.zeros(1, HIDDEN_SIZE)
 
@@ -167,7 +163,6 @@ if __name__ == "__main__":
             rnn.zero_grad()
             
             #batch_category = category_tensor.expand(input_line_tensor.shape[0], category_tensor.shape[1])
-
             input_data = input_line_tensor
 
             out = rnn(input_data.to(device))
