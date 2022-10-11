@@ -96,17 +96,10 @@ def random_training_example():
     sequence_tensor = csv_to_tensor(sequence)
     return category,sequence,category_tensor,sequence_tensor
 
-<<<<<<< Updated upstream
-if torch.cuda.is_available():
-    device = 'cuda'
-# elif torch.backends.mps.is_available() and torch.backends.mps.is_built(): device = 'mps'
-else: 
-    device = 'cpu'
-=======
 
 # SETTING THE CORRECT GRAPHIC ACCELERATION
 device = "cuda" if torch.cuda.is_available() else "cpu"
->>>>>>> Stashed changes
+
 
 print('using device: ',device)
 
