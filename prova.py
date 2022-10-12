@@ -17,7 +17,7 @@ PATH = r"./"
 # POINTS VARIABLE IS THE SIZE OF THE INPUT OF MY NEURAL NETWORK
 
 POINTS = 33
-HIDDEN_SIZE = 1
+HIDDEN_SIZE = 11
 
 def findFiles(path): return glob.glob(path)
 
@@ -112,8 +112,7 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         
         self.hidden_size = hidden_size
-        self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(input_size + hidden_size, output_size)
+        self.rnn = nn.RNN(input_size=input_size, hidden_size=hidden_size,num_layers=1)
         self.softmax = nn.LogSoftmax(dim=1)
         
     def forward(self, input_tensor, hidden_tensor):
@@ -121,9 +120,9 @@ class RNN(nn.Module):
 
         input_tensor = input_tensor.float()
 
-        combined = torch.cat((input_tensor.to(device), hidden_tensor.to(device)), 1)
-        hidden = self.i2h(combined)
-        output = self.i2o(combined)
+        #combined = torch.cat((input_tensor.to(device), hidden_tensor.to(device)), 1)
+        output,hidden = self.rnn(input_tensor,hidden_tensor)
+        
         output = self.softmax(output)
         return output, hidden
     
@@ -136,8 +135,8 @@ rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 
 
 
-criterion = nn.CrossEntropyLoss()
-#criterion = nn.NLLLoss()
+#criterion = nn.CrossEntropyLoss()
+criterion = nn.NLLLoss()
 
 
 learning_rate = 0.005
@@ -146,7 +145,7 @@ optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 def train(line_tensor, category_tensor):
     hidden = rnn.init_hidden()
     
-    skip_frame =0
+    skip_frame = 0
     for i in range(line_tensor.size()[0]):
         if skip_frame==0:
             output, hidden = rnn(line_tensor[i], hidden)
@@ -222,7 +221,7 @@ while True:
         number_of_tests = 0
         print('start testing the result')
         for gesture in all_gestures:
-            list_of_videos = glob.glob('./test/'+gesture+ '/'+ '*.csv')
+            list_of_videos = glob.glob('./data/'+gesture+ '/'+ '*.csv')
             for elem in list_of_videos:
                 solution = gesture
                 predicted_value = predict(elem)
