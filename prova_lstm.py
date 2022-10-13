@@ -16,7 +16,7 @@ PATH = r"./"
 # THESE ARE THE PARAMETERS FOR MY NEURAL NETWORK
 # POINTS VARIABLE IS THE SIZE OF THE INPUT OF MY NEURAL NETWORK
 
-POINTS = 33
+POINTS =13
 HIDDEN_SIZE = 11
 
 def findFiles(path): return glob.glob(path)
@@ -90,7 +90,11 @@ def category_from_output(output):
 
 def random_training_example():
     category, sequence = get_random_video()
-    li = all_gestures.index(category)
+
+    #li = all_gestures.index(category)
+    #category_tensor = torch.zeros(num_gestures)
+    #category_tensor[li] = 1
+
     category_tensor = torch.tensor([all_gestures.index(category)], dtype=torch.long)
     #print(category_tensor)
     sequence_tensor = csv_to_tensor(sequence)
@@ -143,7 +147,7 @@ learning_rate = 0.005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 
 def train(line_tensor, category_tensor):
-
+    
     hidden = (torch.zeros(1,num_gestures),torch.zeros(1,num_gestures))
     skip_frame = 0
     for i in range(line_tensor.size()[0]):

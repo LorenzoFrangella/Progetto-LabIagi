@@ -16,7 +16,7 @@ PATH = r"./"
 # THESE ARE THE PARAMETERS FOR MY NEURAL NETWORK
 # POINTS VARIABLE IS THE SIZE OF THE INPUT OF MY NEURAL NETWORK
 
-POINTS = 33
+POINTS = 13
 HIDDEN_SIZE = 1
 
 def findFiles(path): return glob.glob(path)
@@ -97,6 +97,8 @@ def random_training_example():
     return category,sequence,category_tensor,sequence_tensor
 
 
+
+
 # SETTING THE CORRECT GRAPHIC ACCELERATION
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -136,8 +138,8 @@ rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 
 
 
-criterion = nn.CrossEntropyLoss()
-#criterion = nn.NLLLoss()
+#criterion = nn.CrossEntropyLoss()
+criterion = nn.NLLLoss()
 
 
 learning_rate = 0.005
@@ -150,7 +152,7 @@ def train(line_tensor, category_tensor):
     for i in range(line_tensor.size()[0]):
         if skip_frame==0:
             output, hidden = rnn(line_tensor[i], hidden)
-            skip_frame=0
+            skip_frame=4
         else:
             skip_frame=skip_frame-1
         
@@ -165,7 +167,7 @@ def train(line_tensor, category_tensor):
 
 current_loss = 0
 all_losses = []
-plot_steps, print_steps = 1000, 5000
+plot_steps, print_steps = 100, 500
 n_iters = 100000
 
 if not os.path.exists(PATH + r"RNN.pth"):
@@ -185,7 +187,7 @@ if not os.path.exists(PATH + r"RNN.pth"):
             guess = category_from_output(output)
             correct = "CORRECT" if guess == category else f"WRONG ({category})"
             print(f"{i+1} {(i+1)/n_iters*100} {loss:.4f} {line} / {guess} {correct}")
-            print("valore dell output ",output[0])
+            print("valore dell output ",output)
     
     torch.save(rnn.state_dict(), PATH + r"RNN.pth")
 

@@ -16,7 +16,7 @@ PATH = r"./"
 # THESE ARE THE PARAMETERS FOR MY NEURAL NETWORK
 # POINTS VARIABLE IS THE SIZE OF THE INPUT OF MY NEURAL NETWORK
 
-POINTS = 33
+POINTS = 13
 HIDDEN_SIZE = 11
 
 def findFiles(path): return glob.glob(path)
@@ -113,7 +113,7 @@ class RNN(nn.Module):
         
         self.hidden_size = hidden_size
         self.rnn = nn.RNN(input_size=input_size, hidden_size=hidden_size,num_layers=1)
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.softmax = nn.Softmax(dim=1)
         
     def forward(self, input_tensor, hidden_tensor):
         input_tensor = input_tensor.unsqueeze(0)
@@ -135,8 +135,8 @@ rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 
 
 
-#criterion = nn.CrossEntropyLoss()
-criterion = nn.NLLLoss()
+criterion = nn.CrossEntropyLoss()
+#criterion = nn.NLLLoss()
 
 
 learning_rate = 0.005
