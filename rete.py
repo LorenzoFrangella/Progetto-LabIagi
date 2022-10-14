@@ -11,6 +11,19 @@ import torch
 from torch import nn
 import matplotlib.pyplot as plt
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 PATH = r"./"
 
 # THESE ARE THE PARAMETERS FOR MY NEURAL NETWORK
@@ -143,6 +156,7 @@ criterion = nn.NLLLoss()
 
 
 learning_rate = 0.0008
+
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 
 def train(line_tensor, category_tensor):
@@ -225,15 +239,18 @@ while True:
         number_of_tests = 0
         print('start testing the result')
         for gesture in all_gestures:
-            list_of_videos = glob.glob('./data/'+gesture+ '/'+ '*.csv')
+            list_of_videos = glob.glob('./test/'+gesture+ '/'+ '*.csv')
             for elem in list_of_videos:
                 solution = gesture
                 predicted_value = predict(elem)
                 if predicted_value == solution:
+                    print(f"{bcolors.OKGREEN} CORRECT {bcolors.ENDC}","TEST NUMBER: ",number_of_tests+1,"THE CATEGORY IS:",solution)
                     score +=1
+                else:
+                    print(f"{bcolors.FAIL} WRONG {bcolors.ENDC}","TEST NUMBER: ",number_of_tests+1,"THE CATEGORY IS:",solution, "PREDICTED CATEGORY: ",predicted_value)
                 number_of_tests +=1
-                print('test number: ',number_of_tests,' it must be: ', solution, ' it is: ', predicted_value)
-        print('test ultimated, accuracy on the train dataset: ',score/number_of_tests)
+                #print('test number: ',number_of_tests,' it must be: ', solution, ' it is: ', predicted_value)
+        print('test ultimated, accuracy on the test dataset: ',score/number_of_tests)
 
     else: 
         print(predict(sentence))
