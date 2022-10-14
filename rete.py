@@ -142,7 +142,7 @@ rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 criterion = nn.NLLLoss()
 
 
-learning_rate = 0.0005
+learning_rate = 0.0008
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 
 def train(line_tensor, category_tensor):
@@ -152,7 +152,7 @@ def train(line_tensor, category_tensor):
     for i in range(line_tensor.size()[0]):
         if skip_frame==0:
             output, hidden = rnn(line_tensor[i], hidden)
-            skip_frame=4
+            skip_frame=0
         else:
             skip_frame=skip_frame-1
         
@@ -169,12 +169,12 @@ def train(line_tensor, category_tensor):
 
 current_loss = 0
 all_losses = []
-plot_steps, print_steps = 100, 500
+plot_steps, print_steps = 1000, 5000
 n_iters = 100000
 
 if not os.path.exists(PATH + r"RNN.pth"):
     print('modello non allenato')
-
+    
     for i in range(n_iters):
         category, line, category_tensor, line_tensor = random_training_example()
         

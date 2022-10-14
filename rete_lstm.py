@@ -3,9 +3,6 @@ from io import open
 import glob
 import os
 from re import A
-from tkinter import HIDDEN
-import unicodedata
-import string
 import random
 import time
 import math
