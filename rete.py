@@ -16,8 +16,8 @@ PATH = r"./"
 # THESE ARE THE PARAMETERS FOR MY NEURAL NETWORK
 # POINTS VARIABLE IS THE SIZE OF THE INPUT OF MY NEURAL NETWORK
 
-POINTS = 13
-HIDDEN_SIZE = 1
+POINTS = 33
+HIDDEN_SIZE = 11
 
 def findFiles(path): return glob.glob(path)
 
@@ -142,7 +142,7 @@ rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 criterion = nn.NLLLoss()
 
 
-learning_rate = 0.005
+learning_rate = 0.0005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 
 def train(line_tensor, category_tensor):
@@ -156,6 +156,8 @@ def train(line_tensor, category_tensor):
         else:
             skip_frame=skip_frame-1
         
+    ## proviamo ad ottimizzare l'algoritmo solo quando il risultato è errato
+
 
     loss = criterion(output.to(device), category_tensor.to(device)).to(device)
     
@@ -209,7 +211,6 @@ def predict(input_line):
     
         for i in range(line_tensor.size()[0]):
             output, hidden = rnn(line_tensor[i].to(device), hidden.to(device))
-        
         guess = category_from_output(output)
         #print(guess)
         return(guess)
@@ -224,7 +225,7 @@ while True:
         number_of_tests = 0
         print('start testing the result')
         for gesture in all_gestures:
-            list_of_videos = glob.glob('./test/'+gesture+ '/'+ '*.csv')
+            list_of_videos = glob.glob('./data/'+gesture+ '/'+ '*.csv')
             for elem in list_of_videos:
                 solution = gesture
                 predicted_value = predict(elem)
