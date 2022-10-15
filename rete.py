@@ -93,6 +93,7 @@ def get_random_video():
 
 def category_from_output(output):
     category_idx = torch.argmax(output).item()
+    print('probability: ', output[0][category_idx].item())
     return all_gestures[category_idx]
 
 #THIS FUNCTION GET AS INPUT THE RANDOM VIDEO FROM get_random_video() FUNCTION AND RETURNS 
@@ -129,7 +130,7 @@ class RNN(nn.Module):
         self.hidden_size = hidden_size
         self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
         self.i2o = nn.Linear(input_size + hidden_size, output_size)
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.softmax = nn.Softmax(dim=1)
         
     def forward(self, input_tensor, hidden_tensor):
         input_tensor = input_tensor.unsqueeze(0)
@@ -225,6 +226,7 @@ def predict(input_line):
     
         for i in range(line_tensor.size()[0]):
             output, hidden = rnn(line_tensor[i].to(device), hidden.to(device))
+        print(output)
         guess = category_from_output(output)
         #print(guess)
         return(guess)
