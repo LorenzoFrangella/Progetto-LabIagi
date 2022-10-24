@@ -151,8 +151,8 @@ class RNN(nn.Module):
 rnn = RNN(POINTS*3, HIDDEN_SIZE, num_gestures).to(device)
 
 
+#Negative log likelihood loss 
 
-#criterion = nn.CrossEntropyLoss()
 criterion = nn.NLLLoss()
 
 

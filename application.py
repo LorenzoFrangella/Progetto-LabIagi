@@ -92,7 +92,7 @@ with mp_pose.Pose(
     if not success:
       print("Ignoring empty camera frame.")
       # If loading a video, use 'break' instead of 'continue'.
-      continue
+      break
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = pose.process(image)
@@ -107,7 +107,7 @@ with mp_pose.Pose(
             clip = clip+1
             result,hidden_state = rnn(tensore,hidden_state)
             categoria, probabilità = category_from_output(result)
-            if probabilità>=0.65:
+            if probabilità>=0.60:
                 print(categoria)
             else:
                 print('no gesture detected')
